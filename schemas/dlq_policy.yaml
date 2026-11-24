@@ -1,0 +1,32 @@
+# DLQ Policy — Phase 7 Engine Interface Spec
+# Ref: operations/phase7_session_note_2026-11-24.md §5
+
+# Retention period (days) — aligned with weekly operations review
+ttl_days: 7
+
+# Maximum messages per engine — overflow evicts oldest
+max_size: 10000
+
+# Replay mode: "none" | "manual" | "automatic"
+# "manual" requires CLI: dlq replay --trace-id <id> --fix-payload <json>
+# Automatic replay is prohibited due to infinite-loop risk
+replay_mode: manual
+
+# Visibility metrics (Prometheus)
+metrics:
+  - name: engine_dlq_size
+    type: gauge
+    description: "Current number of messages in DLQ"
+  - name: engine_dlq_age_hours
+    type: gauge
+    description: "Oldest message age in hours"
+  - name: engine_dlq_overflow_total
+    type: counter
+    description: "Total count of overflow evictions"
+
+# Alerting thresholds
+alerts:
+  - metric: engine_dlq_age_hours
+    condition: "> 24"
+    action: "notify_ops_channel"
+    description: "Alert if oldest DLQ message exceeds 24 hours"

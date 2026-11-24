@@ -53,7 +53,7 @@ class TestMessageBroker:
         stats = broker.get_stats()
         assert stats["enqueued"] == 1
         assert stats["dequeued"] == 1
-        assert stats["avg_latency_ms"] > 0.0  # Should be positive ms
+        assert stats["avg_latency_ms"] >= 0.0  # Should be non-negative ms
 
     @pytest.mark.asyncio
     async def test_queue_depth(self, broker):

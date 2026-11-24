@@ -1,0 +1,12 @@
+# MID Project Phase 7 - Dead Letter Queue Policy
+# 運用ルールのコード化（自動化スクリプト/監視で参照）
+
+ttl_days: 7                              # 保留期間: 7 日（週次レビュー間に合わせ）
+max_size: 10000                          # 最大件数/エンジン（超過時最古から削除）
+replay_mode: "manual"                    # リプレイ: 手動のみ（自動リプレイ禁止）
+replay_command_template: "dlq replay --trace-id {trace_id} --fix-payload {json}"
+
+metrics:
+  age_hours: "engine_dlq_age_hours"      # Grafana メトリクス名
+  overflow_total: "dlq_overflow_total"   # 溢れカウンタ
+  alert_threshold_hours: 24              # アラート閾値（24h 超で通知）

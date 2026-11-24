@@ -8,11 +8,13 @@ import time
 import msgspec
 from schemas.contract import Envelope
 from schemas.verify import verify_envelope
+from schemas.dlq import DeadLetterQueue
 
 
 class MessageBroker:
-    def __init__(self, maxsize: int = 1000):
+    def __init__(self, maxsize: int = 1000, dlq: DeadLetterQueue | None = None):
         self._queue: asyncio.Queue = asyncio.Queue(maxsize=maxsize)
+        self._dlq = dlq if dlq is not None else DeadLetterQueue()
         self._stats = {
             "enqueued": 0,
             "dequeued": 0,
@@ -40,6 +42,8 @@ class MessageBroker:
         ok, err, validated = verify_envelope(raw)
         if not ok:
             self._stats["rejected_dlq"] += 1
+            # Record to DLQ (protocol: invalid envelopes must be persisted)
+            self._dlq.record(msg_type, payload, str(err), trace_id)
             return False
         
         await self._queue.put((time.time_ns(), validated))

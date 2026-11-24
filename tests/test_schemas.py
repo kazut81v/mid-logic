@@ -1,4 +1,4 @@
-Phase 7 Schema & Envelope Verification Tests
+"""Phase 7 Schema & Envelope Verification Tests
 Covers: Normal cases, SchemaViolation, BusinessReject, Unknown msg_type
 """
 

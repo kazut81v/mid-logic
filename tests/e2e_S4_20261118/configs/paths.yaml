@@ -1,0 +1,6 @@
+base_path: "OneDrive/Vault"
+projects_path: "Memory/Projects"
+configs_path: "Memory/Projects/mid_logic/tests/e2e_S4_20261118/configs"
+feedback_path: "Memory/Feedback"
+prompts_path: "Memory/Prompts"
+log_path: "Memory/Feedback/logs"

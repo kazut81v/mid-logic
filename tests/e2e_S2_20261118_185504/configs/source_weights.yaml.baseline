@@ -1,0 +1,32 @@
+health_metrics:
+  gov_official:
+    consecutive_failures: 0
+    last_success: '2026-11-15'
+  tech_journal_a:
+    consecutive_failures: 0
+    last_success: '2026-11-15'
+sources:
+  gov_official:
+    base_weight: 0.4800000000000002
+    failure_threshold: 3
+    health_check_endpoint: manual_check
+    health_metrics:
+      consecutive_failures: 0
+      last_success: '2026-11-18T17:27:17.098870'
+    id: gov_official
+    refresh_interval_min: 1440
+    reliability_category: critical
+    selector_config:
+    - official_bulletin
+    - press_release
+    type: manual
+  tech_journal_a:
+    base_weight: 1.1800000000000004
+    failure_threshold: 5
+    health_check_endpoint: rss_feed
+    id: tech_journal_a
+    refresh_interval_min: 60
+    reliability_category: high
+    selector_config:
+    - tech_trends
+    type: rss

@@ -1,0 +1,15 @@
+[project]
+name = "mid-logic"
+version = "0.7.0"
+description = "MID Logic - Phase 7 Engine Interface"
+requires-python = ">=3.10"
+dependencies = [
+    "msgspec>=0.18.0",
+    "pydantic>=2.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pytest_asyncio]
+mode = "auto"

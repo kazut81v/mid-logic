@@ -1,0 +1,57 @@
+# Backup of feedback_processor.py
+import json
+import os
+from datetime import datetime
+import yaml
+
+# Configuration paths
+CONFIG_DIR = "Memory/Configs"
+WEIGHTS_FILE = os.path.join(CONFIG_DIR, "source_weights.yaml")
+RULES_FILE = os.path.join(CONFIG_DIR, "feedback_rules.yaml")
+FEEDBACK_DIR = "Memory/Feedback"
+
+def load_weights():
+    with open(WEIGHTS_FILE, 'r') as f:
+        return yaml.safe_load(f)
+
+def save_weights(weights):
+    with open(WEIGHTS_FILE, 'w') as f:
+        yaml.dump(weights, f, default_flow_style=False)
+
+def load_rules():
+    with open(RULES_FILE, 'r') as f:
+        return yaml.safe_load(f)
+
+def process_feedback_log(log_file):
+    """
+    Processes a single JSONL feedback log and updates source weights.
+    """
+    rules = load_rules()
+    weights = load_weights()
+    
+    with open(log_file, 'r') as f:
+        for line in f:
+            if not line.strip(): continue
+            entry = json.loads(line)
+            
+            source_id = entry.get("source_id")
+            feedback_type = entry.get("feedback_type")
+            impact_score = entry.get("impact_score", 0)
+            
+            if source_id in weights['sources']:
+                source = weights['sources'][source_id]
+                
+                # Apply rule-based delta if exists
+                if feedback_type in rules.get("feedback_rules", {}):
+                    delta = rules["feedback_rules"][feedback_type].get("source_weight_delta", 0)
+                    # Apply delta and clip
+                    new_weight = source.get("base_weight", 1.0) + delta
+                    source["base_weight"] = max(rules.get("weight_min", 0.1), min(rules.get("weight_max", 1.5), new_weight))
+                    print(f"Applied {feedback_type} to {source_id}: new weight {source['base_weight']}")
+                
+                save_weights(weights)
+    return "Feedback processed successfully."
+
+if __name__ == "__main__":
+    # Example usage (not to be called directly by engines usually)
+    print("Feedback Processor Ready.")

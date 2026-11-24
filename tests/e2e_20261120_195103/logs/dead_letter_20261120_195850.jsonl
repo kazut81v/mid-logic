@@ -1,0 +1,1 @@
+{"timestamp": "2026-11-20T19:58:50.718906", "engine_id": "FeedbackProcessor", "action_type": "dead_letter", "correlation_id": "1c2744acd3e740189be662f01c6c2c5c", "raw_line": "{invalid json line", "error": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)", "source_id": "", "feedback_type": "", "impact_score": 0}

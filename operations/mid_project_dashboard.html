@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIDプロジェクト進捗ダッシュボード</title>
+<style>
+:root {
+  --bg: #0d0e14;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #818cf8;
+  --border: #2a2d3e;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --cyan: #2dd4bf;
+  --orange: #fb923c;
+  --phase-bg: #13141c;
+  --task-bg: #0f1018;
+  --task-hover: #1a1c2a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.header { text-align: center; padding: 12px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.header h1 { font-size: 1.4em; color: var(--accent); margin-bottom: 4px; }
+.header .meta { font-size: 0.82em; color: var(--muted); }
+.overview { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat {
+  flex: 1; min-width: 100px;
+  background: var(--phase-bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; text-align: center;
+}
+.stat .num { font-size: 1.6em; font-weight: 700; }
+.stat .label { font-size: 0.75em; color: var(--muted); margin-top: 2px; }
+.stat.complete .num { color: var(--green); }
+.stat.in-progress .num { color: var(--yellow); }
+.stat.pending .num { color: var(--muted); }
+.stat.total .num { color: var(--accent); }
+
+/* Phase cards */
+.phase {
+  background: var(--phase-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.phase-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  user-select: none; transition: background 0.15s;
+}
+.phase-header:hover { background: var(--task-hover); }
+.phase-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+}
+.phase-dot.complete { background: var(--green); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+.phase-dot.in-progress { background: var(--yellow); box-shadow: 0 0 6px rgba(251,191,36,0.4); animation: pulse 2s infinite; }
+.phase-dot.pending { background: var(--border); }
+.phase-dot.blocked { background: var(--red); box-shadow: 0 0 6px rgba(248,113,113,0.4); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.phase-title { flex: 1; font-size: 0.92em; font-weight: 600; color: #f1f5f9; }
+.phase-badge {
+  font-size: 0.7em; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+}
+.phase-badge.complete { background: rgba(52,211,153,0.15); color: var(--green); }
+.phase-badge.in-progress { background: rgba(251,191,36,0.15); color: var(--yellow); }
+.phase-badge.pending { background: rgba(148,163,184,0.15); color: var(--muted); }
+.phase-progress { font-size: 0.8em; color: var(--muted); min-width: 60px; text-align: right; }
+.phase-bar-wrap {
+  height: 4px; background: rgba(255,255,255,0.05); margin: 0 14px 0 36px;
+}
+.phase-bar {
+  height: 100%; border-radius: 2px; transition: width 0.5s;
+}
+.phase-bar.complete { background: var(--green); }
+.phase-bar.in-progress { background: var(--yellow); }
+.phase-bar.pending { background: var(--muted); }
+.phase-tasks {
+  display: none; padding: 6px 14px 10px 36px;
+}
+.phase.expanded .phase-tasks { display: block; }
+.task {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; border-radius: 4px;
+  font-size: 0.82em; font-family: 'Menlo', 'Consolas', monospace;
+  color: #e2e8f0;
+}
+.task:hover { background: var(--task-hover); }
+.task-status {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.task-status.complete { background: var(--green); }
+.task-status.in-progress { background: var(--yellow); }
+.task-status.pending { background: var(--border); }
+.task-status.blocked { background: var(--red); }
+.task-id { color: var(--accent); min-width: 55px; }
+.task-name { flex: 1; color: #f1f5f9; }
+.task-detail { color: var(--muted); font-size: 0.9em; }
+
+/* Legend */
+.legend {
+  display: flex; gap: 16px; padding: 12px 14px;
+  font-size: 0.78em; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 4px;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Current position marker */
+.current-marker {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(251,191,36,0.12); color: var(--yellow);
+  padding: 2px 8px; border-radius: 10px; font-size: 0.75em;
+  font-weight: 600; white-space: nowrap;
+}
+.note {
+  margin-top: 8px; padding: 8px 12px;
+  background: rgba(129,140,248,0.08); border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0; font-size: 0.82em; color: var(--muted);
+  line-height: 1.7;
+}
+.note strong { color: #f1f5f9; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>MIDプロジェクト 全タスクロードマップ</h1>
+  <div class="meta">生成: 2026-11-23T10:45 JST ｜ 三者: User / Respawn / Librarian ｜ 基準日: 2026-11-23</div>
+</div>
+
+<div class="overview">
+  <div class="stat total"><div class="num">8</div><div class="label">全フェーズ</div></div>
+  <div class="stat complete"><div class="num">6</div><div class="label">完了</div></div>
+  <div class="stat in-progress"><div class="num">1</div><div class="label">進行中</div></div>
+  <div class="stat pending"><div class="num">1</div><div class="label">未着手</div></div>
+  <div class="stat"><div class="num" style="color:var(--red)">1</div><div class="label">待機中(*)</div></div>
+</div>
+
+<!-- Phase 1 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 1: Planning &amp; Design</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">3/3 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P1-01</div><div class="task-name">アーキテクチャ設計</div><div class="task-detail">Architecture-Design.md</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P1-02</div><div class="task-name">ログ設計書</div><div class="task-detail">Logging-Design.md</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P1-03</div><div class="task-name">CIガード設計</div><div class="task-detail">CI-Guard-Check.md</div></div>
+  </div>
+</div>
+
+<!-- Phase 2 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 2: Core Development</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">5/5 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P2-01</div><div class="task-name">logger.py</div><div class="task-detail">JSONL形式ログ</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P2-02</div><div class="task-name">weight_manager.py</div><div class="task-detail">weight/health管理</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P2-03</div><div class="task-name">feedback_processor.py</div><div class="task-detail">フィードバック処理</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P2-04</div><div class="task-name">paths.yaml</div><div class="task-detail">パス標準化</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">P2-05</div><div class="task-name">mid_daily_run.py</div><div class="task-detail">日次実行スクリプト</div></div>
+  </div>
+</div>
+
+<!-- Phase 3 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 3: E2E Edge Case Testing</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">34/34 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">S1-S8</div><div class="task-name">全シナリオ (A/B/C)</div><div class="task-detail">Inject→Detect→Respond→Recover→Prevent</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">RW-01/02</div><div class="task-name">回帰テスト</div><div class="task-detail">全ワークフロー再実行</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">CI-01/02</div><div class="task-name">CI Guard &amp; ログ分離</div><div class="task-detail">Test/Prod分離</div></div>
+  </div>
+</div>
+
+<!-- Phase 4 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 4: Verification</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">6/6 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-01</div><div class="task-name">最終回帰スイート</div><div class="task-detail">TC-WF-01/02/03全タスク再実行</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-02</div><div class="task-name">モニタリング集約検証</div><div class="task-detail">全インバリアント満足</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-03</div><div class="task-name">fault_response_flow.mdカバレッジ</div><div class="task-detail">8シナリオ全Phase A-E完了</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-04</div><div class="task-name">rollback_plan.md L0/L1/L2</div><div class="task-detail">全レベル検証済み</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-05</div><div class="task-name">deployment_procedures.md R1</div><div class="task-detail">CWD強制テスト済み</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">V-09</div><div class="task-name">Go/No-Go決定</div><div class="task-detail">PASS → 運用移行</div></div>
+  </div>
+</div>
+
+<!-- Phase 5 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 5: Operational Readiness</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">6/6 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-01</div><div class="task-name">monitoring_design.md</div><div class="task-detail">実稼働監視設計</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-02</div><div class="task-name">fault_response_flow.md</div><div class="task-detail">障害時レスポンスフロー</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-03</div><div class="task-name">deployment_procedures.md</div><div class="task-detail">本番デプロ手順書</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-04</div><div class="task-name">rollback_plan.md</div><div class="task-detail">L0/L1/L2巻き戻し計画</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-05</div><div class="task-name">cron登録・動作確認</div><div class="task-detail">mid-morning-digest登録済み</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">M-06</div><div class="task-name">source_weights.yaml.baseline</div><div class="task-detail">差分管理用ベースライン作成</div></div>
+  </div>
+</div>
+
+<!-- Phase 6 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot complete"></div>
+    <div class="phase-title">Phase 6: CI Integration</div>
+    <div class="phase-badge complete">完了</div>
+    <div class="phase-progress">3/3 100%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar complete" style="width:100%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status complete"></div><div class="task-id">CI-01</div><div class="task-name">validate_configs.py</div><div class="task-detail">全YAMLバリデーター</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">CI-02</div><div class="task-name">validate_feedback_rules.py</div><div class="task-detail">フィードバックルール検証</div></div>
+    <div class="task"><div class="task-status complete"></div><div class="task-id">CI-03</div><div class="task-name">validate_log_integrity.py</div><div class="task-detail">ログ整合性検証</div></div>
+  </div>
+</div>
+
+<!-- Phase 7 -->
+<div class="phase">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot in-progress"></div>
+    <div class="phase-title">Phase 7: Full Integration ← 現在地</div>
+    <div class="phase-badge in-progress">開発中</div>
+    <div class="phase-progress">0/4 0%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar in-progress" style="width:0%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status pending"></div><div class="task-id">E1-01</div><div class="task-name">Engine-1: ソース情報収集</div><div class="task-detail">設計のみ、未実装</div></div>
+    <div class="task"><div class="task-status pending"></div><div class="task-id">E2-01</div><div class="task-name">Engine-2: フィードバック処理</div><div class="task-detail">設計のみ、未実装</div></div>
+    <div class="task"><div class="task-status pending"></div><div class="task-id">E3-01</div><div class="task-name">Engine-3: 意思決定</div><div class="task-detail">設計のみ、未実装</div></div>
+    <div class="task"><div class="task-status in-progress" style="animation:pulse 2s infinite"></div><div class="task-id">E0-01</div><div class="task-name">cron自動化（一部完了）</div><div class="task-detail">mid-morning-digest登録済み</div></div>
+  </div>
+</div>
+
+<!-- Phase 8 -->
+<div class="phase expanded">
+  <div class="phase-header" onclick="togglePhase(this)">
+    <div class="phase-dot blocked"></div>
+    <div class="phase-title">Phase 8: Deployment &amp; S4 L2 Rollback</div>
+    <div class="phase-badge pending">待機中</div>
+    <div class="phase-progress">1/2 50%</div>
+  </div>
+  <div class="phase-bar-wrap"><div class="phase-bar pending" style="width:50%"></div></div>
+  <div class="phase-tasks">
+    <div class="task"><div class="task-status in-progress"></div><div class="task-id">D-01</div><div class="task-name">cron本格運用</div><div class="task-detail">登録済み、実行未確認</div></div>
+    <div class="task"><div class="task-status blocked"></div><div class="task-id">D-02</div><div class="task-name">S4 L2 deliberate test</div><div class="task-detail"><span class="current-marker">⏳ 待機中</span> 11/22議事録で承認待ち</div></div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>完了</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>進行中</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div>未着手</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>ブロック</div>
+</div>
+
+<div class="note">
+  <strong>📍 現在地説明 (2026-11-23)</strong><br>
+  Phase 1〜6 は全タスク完了済み。Phase 7 (Full Integration) でEngine-1/2/3の実装に移行可能。<br>
+  Phase 8 は S4 L2 deliberate test が User 承認待ちでブロック。<br>
+  <strong>次の一手:</strong> Engine-1 開発着手 (ソース情報収集エンジン) → cron本格運用 → S4 L2テスト<br>
+  <br>
+  <strong>📊 全ログ:</strong> 3日間(11/21〜23)で21イベント。11/23の最新: weight_manager更新 + cron_start<br>
+  <strong>📊 重み:</strong> gov_official(1.0), tech_journal_a(1.0), financial_reporter(1.0) — 全1.0(初期値)
+</div>
+
+<script>
+function togglePhase(el) {
+  el.closest('.phase').classList.toggle('expanded');
+}
+</script>
+
+</body>
+</html>

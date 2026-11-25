@@ -1,0 +1,18 @@
+{
+  "TC-01": {
+    "scenario": "Japan's government to formulate 'AI Digital Reform Principles' and enforcement of the 'AI Act'. Focus on 'best mix' of humans and AI, balancing innovation with safety, and addressing cyber risks.",
+    "raw_data": "政府は、人工知能（ＡＩ）の活用に向けた規制改革を進めるため、省庁横断の指針となる「ＡＩ・デジタル改革原則」を策定する方針を固めた。「人とＡＩのベストミックス」を目指し、弁護士業など人間が独占している業務でＡＩを活用する際のルール整備を進める。技術の進化に合わせた機動的な安全対策も掲げ、サイバー攻撃のリスクを防ぐためのＡＩ法の見直しを検討する。また、2025年9月には『人工知能関連技術の研究開発及び活用の推進に関する法律』（AI法）が全面施行された。AI法は、開発の推進とリスクへの配慮を両立させることを目的とする。"
+  },
+  "TC-02": {
+    "scenario": "Conflicting reports: Source A (Tech Journal) reports X, Source B (Media) reports Y.",
+    "raw_data": "【ソースA：技術ジャーナル】次世代AIモデルは、電力消費を80%削減する構造的革新を達成したと発表。【ソースB：大手メディア】同モデルの実装には環境負荷の問題があり、商業利用には慎重な判断が必要であると報道。両者の間で、技術的進歩と環境的コストの評価に乖離がある。"
+  },
+  "TC-03": {
+    "scenario": "Low-evidence / Rumor Detection",
+    "raw_data": "SNS上で特定のAI企業による大規模なデータ流出の噂が拡散している。現時点では公式な発表はなく、単なる憶測の域を出ていないが、株価への影響は大きい。"
+  },
+  "TC-04": {
+    "scenario": "Partial Access / Paywall Limitation",
+    "raw_data": "【有料記事の一部】日本の製造業におけるAI導入の成功事例分析。A社は生産性を30%向上させたが、詳細なコスト構造や具体的なアルゴリズムについては会員限定のセクションに隔離されている。"
+  }
+}

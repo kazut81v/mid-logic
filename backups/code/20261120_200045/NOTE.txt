@@ -1,0 +1,3 @@
+created: 20261120_200045
+note: L2 restore point: S4 rollback + Phase 6 CI validators
+targets: weight_manager.py, feedback_processor.py, logger.py

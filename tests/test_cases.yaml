@@ -1,0 +1,48 @@
+---
+test_suite: "MID Phase 3 Integration Tests"
+description: "Verification of Engine 1 (Filtering), Engine 2 (Synthesis), and Feedback Logic."
+
+test_cases:
+  - id: TC-01
+    name: "Standard Government Announcement"
+    scenario: "A formal government press release regarding a new AI safety policy."
+    expected_constraints:
+      engine_1_reliability: "High"
+      impact_category: "Structural Change"
+      engine_2_yaml_required: true
+      expected_confidence: "High"
+      
+  - id: TC-02
+    name: "Conflicting Reports Synthesis"
+    scenario: "Source A (Tech Journal) reports X, Source B (Major Media) reports Y (contradictory information)."
+    expected_constraints:
+      engine_1_reliability: "Medium"
+      engine_2_conflict_notation: true
+      engine_2_yaml_required: true
+      expected_confidence: "Medium"
+      
+  - id: TC-03
+    name: "Low-Evidence / Rumor Detection"
+    scenario: "Unverified social media rumors regarding a data breach at a major tech firm."
+    expected_constraints:
+      engine_1_reliability: "Low"
+      engine_2_confidence_gap: true
+      engine_2_yaml_required: true
+      expected_confidence: "Low"
+      
+  - id: TC-04
+    name: "Partial Access / Paywall Limitation"
+    scenario: "A detailed economic analysis with significant portions behind a paywall."
+    expected_constraints:
+      engine_1_reliability: "Medium"
+      engine_2_confidence_gap: true
+      engine_2_yaml_required: true
+      expected_confidence: "Medium"
+      
+  - id: TC-05
+    name: "Feedback Loop Verification"
+    scenario: "Execute TC-01, then provide negative feedback on a specific source."
+    expected_constraints:
+      feedback_type: "inappropriate"
+      weight_delta_check: -0.10
+      verification_method: "Check source_weights.yaml for weight reduction"

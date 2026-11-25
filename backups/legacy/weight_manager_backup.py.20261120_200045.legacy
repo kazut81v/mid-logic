@@ -1,0 +1,36 @@
+# Backup of weight_manager.py
+import yaml
+import os
+from datetime import datetime
+
+# Configuration paths
+CONFIG_DIR = "Memory/Configs"
+WEIGHTS_FILE = os.path.join(CONFIG_DIR, "source_weights.yaml")
+RULES_FILE = os.path.join(CONFIG_DIR, "feedback_rules.yaml")
+
+def load_weights():
+    with open(WEIGHTS_FILE, 'r') as f:
+        return yaml.safe_load(f)
+
+def save_weights(weights):
+    with open(WEIGHTS_FILE, 'w') as f:
+        yaml.dump(weights, f, default_flow_style=False)
+
+def update_health_metrics(source_id, success, failure_count=1):
+    weights = load_weights()
+    if source_id in weights['sources']:
+        source = weights['sources'][source_id]
+        
+        if success:
+            source['health_metrics']['last_success'] = datetime.now().isoformat()
+            source['health_metrics']['consecutive_failures'] = 0
+        else:
+            source['health_metrics']['consecutive_failures'] = source['health_metrics'].get('consecutive_failures', 0) + failure_count
+            
+        save_weights(weights)
+        return {"status": "success", "source_id": source_id, "metrics": source['health_metrics']}
+    return {"status": "error", "message": "Source ID not found"}
+
+if __name__ == "__main__":
+    # Test load
+    print("Loaded weights:", load_weights())

@@ -1,0 +1,8 @@
+feedback_rules:
+  inappropriate: {"source_weight_delta": -0.10}
+  fix_requested: {"source_weight_delta": 0.05}
+  useful: {"source_weight_delta": 0.02}
+
+# Constraints
+weight_min: 0.1
+weight_max: 1.5

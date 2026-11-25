@@ -1,0 +1,10 @@
+{"source_id": "gov_official", "feedback_type": "inappropriate", "impact_score": 0.8, "content": "This response is completely wrong and offensive."}
+{"source_id": "gov_official", "feedback_type": "inappropriate", "impact_score": 0.9, "content": "Harmful content that violates safety guidelines."}
+{"source_id": "gov_official", "feedback_type": "inappropriate", "impact_score": 0.7, "content": "Inappropriate language and toxic behavior."}
+{"source_id": "tech_journal_a", "feedback_type": "fix_requested", "impact_score": 0.6, "content": "Please fix the calculation error in section 3."}
+{"source_id": "tech_journal_a", "feedback_type": "fix_requested", "impact_score": 0.7, "content": "The code has a bug, please correct the logic."}
+{"source_id": "tech_journal_a", "feedback_type": "fix_requested", "impact_score": 0.5, "content": "Fix requested: missing null check on line 42."}
+{"source_id": "gov_official", "feedback_type": "useful", "impact_score": 0.9, "content": "This explanation is very clear and helpful."}
+{"source_id": "gov_official", "feedback_type": "useful", "impact_score": 0.8, "content": "Great summary, saved me a lot of time."}
+{"source_id": "tech_journal_a", "feedback_type": "useful", "impact_score": 0.7, "content": "Useful reference for the API documentation."}
+{"source_id": "tech_journal_a", "feedback_type": "useful", "impact_score": 0.6, "content": "This is exactly what I needed, thank you."}

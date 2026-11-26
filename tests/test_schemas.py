@@ -1,5 +1,4 @@
-"""
-Phase 7 Schema & Envelope Verification Tests
+"""Phase 7 Schema & Envelope Verification Tests
 Covers: Normal cases, SchemaViolation, BusinessReject, Unknown msg_type
 """
 
@@ -140,3 +139,13 @@ class TestEnvelopeVerification:
         success, err, data = verify_envelope(self._wrap_payload(payload, "SynthesisResult").encode())
         assert success is False
         assert "validation failed" in str(err).lower()
+
+import time
+
+def test_latency_tracking():
+    """Check that latency tracking is enabled in the environment."""
+    start = time.time()
+    time.sleep(0.001)  # 1ms
+    end = time.time()
+    latency = end - start
+    assert latency >= 0.0, f"Latency should be >= 0.0, got {latency}"

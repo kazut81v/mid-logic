@@ -1,0 +1,7 @@
+# Delivery Policy for Engine-3
+retries: 3
+retry_strategy: exponential_backoff
+dlq_enabled: true
+dlq_route: "schemas/dlq.py"
+idempotency_enabled: true
+metrics_enabled: true
